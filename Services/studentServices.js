@@ -5,6 +5,7 @@ const generateToken = require('../utils/genarateToken');
 const genarateOtp = require('../utils/genarateOtp');
 const sendOtpEmail = require('../utils/mailer');
 const passwordValidate = require('../middleware/passwordValidator');
+const validator = require('validator');
 
 exports.studentRegister = async(data)=> {
     try{
@@ -155,5 +156,185 @@ exports.studentCheckOtp = async(data) => {
     }catch(err){
         console.error(err)
         throw new Error('check otp fail')
+    }
+}
+
+exports.studentUpdatePassword = async(studentId,data) => {
+    try{
+
+        const {newPassword, oldPassword} = data;
+
+        const student = await Student.findById(studentId);
+        
+
+        if(!student){
+            return {code:400,message:'student not valid'}
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword,student.password);
+
+        if(!isMatch){
+            return {code:401,message:'new password and old password not match'};
+        }
+
+        const isPasswordValide = passwordValidate(newPassword) 
+
+        if(isPasswordValide.valid === false){
+            return {code:402,message:isPasswordValide.errors}
+        }
+
+        const updateData = {}
+
+        const salt = await bcrypt.genSalt(10);
+
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        updateData.password = hashedPassword
+
+        await student.updateOne(updateData)
+
+        return {code:200, message:'password updated'}
+
+
+    }catch(err){
+        console.error(err)
+        throw new Error('password cant update')
+    }
+}
+
+exports.getByStudentId = async(id) => {
+    try{
+        const student = await Student.findById(id);
+
+        const response = {
+            "name":student.name,
+            "email":student.email,
+            "studentId":student._id
+        }
+
+        return {code:200, data:response}
+    }catch(err){
+        console.error(err)
+        throw new Error('cant get all student data')
+    }
+}
+
+exports.getAllStudent = async() => {
+    try{
+        const student = await Student.find();
+
+        if(!student){
+            return {code:400,data:'not any data'}
+        }
+
+        const response = student.map(a => ({
+            "name": a.name,
+            "email": a.email,
+            "studentId": a._id
+        }));
+        
+        return {code: 200, data: response};
+
+    }catch(err){
+        console.error(err)
+        throw new Error('cant get students')
+    }
+}
+
+exports.deleteStudent = async(id) => {
+    try{
+ 
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return { code: 400, message: 'Invalid admin ID' };
+        }
+
+        const student = await Student.findById(id);
+
+
+        if(!student){
+            return { code: 400, message: 'No student related to that ID' };
+        }
+
+
+        await student.deleteOne();
+
+        return { code: 200, message: 'student deleted successfully' };
+    } catch (err) {
+        console.error(err);
+        return { code: 500, message: 'Server error, unable to delete student' };
+    }
+}
+
+exports.changeStudentState = async(id, state) => {
+    try{
+        const student = await Student.findById(id);
+
+        if(!student){
+            return{code:401, message:'there no student relate id'}
+        }
+
+        const updateData = {};
+        if(state){
+            updateData.accountState = state;
+        }
+
+        await Student.updateOne(updateData);
+
+        return {code:200,message:'updated'}
+    }catch(err){
+        console.error(err);
+        throw new Error('cant change state')
+    }
+}
+
+exports.updateStudent = async(id, data) => {
+    try{
+        const {
+            name,
+            email,
+            profileImg,
+            whatsAppNo,
+            additionalNo,
+            district,
+            scl,
+            address,
+            studentIdImg
+        } = data
+
+        const student = await Student.findById(id);
+        
+
+        if(!student){
+            return {code:401, message:'incorrect id'}
+        }
+
+        const updateData = {};
+
+        if(name){updateData.name = name};
+        if(email){
+            const student = await Student.findOne({email});
+            const emailValidate = validator.isEmail(email);
+
+            if(student){
+                return{code:401, message:'email already registered'}
+            }
+
+            if(!emailValidate){
+                return {code:401,message:'use valid email'}
+            }
+            updateData.email = email
+        };
+        if(profileImg){updateData.profileImg = profileImg};
+        if(whatsAppNo){updateData.whatsAppNo = whatsAppNo};
+        if(additionalNo){updateData.additionalNo = additionalNo};
+        if(district){updateData.district = district};
+        if(scl){updateData.scl = scl};
+        if(address){updateData.address = address};
+        if(studentIdImg){updateData.studentIdImg = studentIdImg};
+
+        await student.updateOne(updateData);
+        return {code:200,message:'updated'}
+    }catch(err){
+        console.error(err);
+        throw new Error('cant update student')
     }
 }
