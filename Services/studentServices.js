@@ -7,6 +7,8 @@ const sendOtpEmail = require('../utils/mailer');
 const passwordValidate = require('../middleware/passwordValidator');
 const validator = require('validator');
 const { createRegNo } = require('../utils/createRegNo');
+const { grantAccess } = require('../middleware/grantAccess');
+const { authorize } = require('../utils/connectDrive');
 
 
 exports.studentRegister = async(data)=> {
@@ -51,6 +53,14 @@ exports.studentRegister = async(data)=> {
         
         if(student){
             return{code:401, message:'email already registered'}
+        }
+        const authClient = await authorize();
+        const fileId = '1kQwlslbEuF6nv4pycVx1EXhavJGxbLk9';
+
+        const isGiveAccess = await grantAccess(authClient,fileId, email)
+
+        if(!isGiveAccess){
+            return{code:405,message:'drive access denite'}
         }
 
         const salt = await bcrypt.genSalt(10);
