@@ -6,6 +6,8 @@ const genarateOtp = require('../utils/genarateOtp');
 const sendOtpEmail = require('../utils/mailer');
 const passwordValidate = require('../middleware/passwordValidator');
 const validator = require('validator');
+const { createRegNo } = require('../utils/createRegNo');
+
 
 exports.studentRegister = async(data)=> {
     try{
@@ -20,7 +22,8 @@ exports.studentRegister = async(data)=> {
             scl,
             address,
             studentIdImg,
-            password
+            password,
+            historyType
         } = data
 
         const requiredField = {
@@ -34,6 +37,7 @@ exports.studentRegister = async(data)=> {
             scl,
             address,
             studentIdImg,
+            historyType,
             password
         };
 
@@ -52,6 +56,8 @@ exports.studentRegister = async(data)=> {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const registerNo = await createRegNo({ batch: batch, classType: classType, historyType: historyType })
+       
         newStudent = new Student ({
             name,
             email,
@@ -66,6 +72,8 @@ exports.studentRegister = async(data)=> {
             address,
             studentIdImg,
             password:hashedPassword,
+            historyType,
+            regNo:registerNo,
             otp:''
 
         })

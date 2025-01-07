@@ -6,6 +6,10 @@ const studentSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    regNo:{
+        type:String,
+        require: true
+    },
     email: {
         type: String,
         required: true,
@@ -21,6 +25,10 @@ const studentSchema = new mongoose.Schema({
         type: String,
         enum: ['admin', 'user'],
         default: 'user',
+    },
+    historyType:{
+        type:String,
+        require:true
     },
     accountState: {
         type: String,
