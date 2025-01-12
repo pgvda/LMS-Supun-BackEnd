@@ -115,7 +115,7 @@ exports.studentLogin = async(data) => {
 
         console.log(token, student)
 
-        return{code:200, message:'student login success', token:token,studentId:student._id}
+        return{code:200, message:'student login success', token:token,studentId:student._id, accountState:student.accountState, accountType:student.accountType}
     }catch(err){
         console.error(err)
         throw new Error('cant log')
@@ -223,13 +223,9 @@ exports.getByStudentId = async(id) => {
     try{
         const student = await Student.findById(id);
 
-        const response = {
-            "name":student.name,
-            "email":student.email,
-            "studentId":student._id
-        }
 
-        return {code:200, data:response}
+
+        return {code:200, data:student}
     }catch(err){
         console.error(err)
         throw new Error('cant get all student data')
