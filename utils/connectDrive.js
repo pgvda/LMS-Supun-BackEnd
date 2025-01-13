@@ -60,6 +60,7 @@ async function listFiles(authClient) {
   const res = await drive.files.list({
     pageSize: 10,
     fields: 'nextPageToken, files(id, name)',
+    q: "'me' in owners or sharedWithMe and trashed = false",
   });
   const files = res.data.files;
   if (files.length === 0) {

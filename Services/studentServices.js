@@ -240,13 +240,8 @@ exports.getAllStudent = async() => {
             return {code:400,data:'not any data'}
         }
 
-        const response = student.map(a => ({
-            "name": a.name,
-            "email": a.email,
-            "studentId": a._id
-        }));
         
-        return {code: 200, data: response};
+        return {code: 200, data: student};
 
     }catch(err){
         console.error(err)
@@ -279,6 +274,7 @@ exports.deleteStudent = async(id) => {
 }
 
 exports.changeStudentState = async(id, state) => {
+    console.log(id,state);
     try{
         const student = await Student.findById(id);
 
@@ -291,7 +287,7 @@ exports.changeStudentState = async(id, state) => {
             updateData.accountState = state;
         }
 
-        await Student.updateOne(updateData);
+        await student.updateOne(updateData);
 
         return {code:200,message:'updated'}
     }catch(err){
