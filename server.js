@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
 const config = require('./config/config');
-const { authorize, listFiles } = require('./utils/connectDrive');
+const { authorize, listPermittedFolders } = require('./utils/connectDrive');
 
 const app = express();
 
@@ -32,7 +32,9 @@ app.use('/api/students', studentRouters);
 app.get('/files', async (req, res) => {
     try {
       const authClient = await authorize();
-      const files = await listFiles(authClient);
+      const email = req.query.email;
+      console.log(email);
+      const files = await listPermittedFolders(authClient, email);
       res.json(files); // Send the list of files as a response
     } catch (error) {
       console.error('Error fetching files:', error.message);

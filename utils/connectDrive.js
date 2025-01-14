@@ -20,22 +20,28 @@ async function loadSavedCredentialsIfExist() {
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
   } catch (err) {
+    console.error('Error loading saved credentials:', err.message);
     return null;
   }
 }
 
 // Save credentials
 async function saveCredentials(client) {
-  const content = await fs.readFile(CREDENTIALS_PATH);
-  const keys = JSON.parse(content);
-  const key = keys.installed || keys.web;
-  const payload = JSON.stringify({
-    type: 'authorized_user',
-    client_id: key.client_id,
-    client_secret: key.client_secret,
-    refresh_token: client.credentials.refresh_token,
-  });
-  await fs.writeFile(TOKEN_PATH, payload);
+  try {
+    const content = await fs.readFile(CREDENTIALS_PATH);
+    const keys = JSON.parse(content);
+    const key = keys.installed || keys.web;
+    const payload = JSON.stringify({
+      type: 'authorized_user',
+      client_id: key.client_id,
+      client_secret: key.client_secret,
+      refresh_token: client.credentials.refresh_token,
+    });
+    await fs.writeFile(TOKEN_PATH, payload);
+    console.log('Credentials saved successfully.');
+  } catch (err) {
+    console.error('Error saving credentials:', err.message);
+  }
 }
 
 // Authorize and return an authenticated client
@@ -54,29 +60,36 @@ async function authorize() {
   return client;
 }
 
-// List files
-async function listFiles(authClient) {
+// List folders shared with a specific email
+async function listPermittedFolders(authClient, email) {
   const drive = google.drive({ version: 'v3', auth: authClient });
-  const res = await drive.files.list({
-    pageSize: 10,
-    fields: 'nextPageToken, files(id, name)',
-    q: "'me' in owners or sharedWithMe and trashed = false",
-  });
-  const files = res.data.files;
-  if (files.length === 0) {
-    console.log('No files found.');
+
+  try {
+    const res = await drive.files.list({
+      q: `'${email}' in readers and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)',
+      pageSize: 10, // Adjust as needed
+    });
+
+    const folders = res.data.files;
+    if (!folders || folders.length === 0) {
+      console.log(`No folders shared with ${email}`);
+      return [];
+    }
+
+    console.log(`Folders shared with ${email}:`);
+    folders.forEach((folder) => {
+      console.log(`${folder.name} (${folder.id})`);
+    });
+
+    return folders;
+  } catch (err) {
+    console.error('Error listing folders:', err.message);
     return [];
   }
-
-  console.log('Files:');
-  files.forEach((file) => {
-    console.log(`${file.name} (${file.id})`);
-  });
-
-  return files; // Return the files for use elsewhere
 }
 
 module.exports = {
   authorize,
-  listFiles,
+  listPermittedFolders,
 };
