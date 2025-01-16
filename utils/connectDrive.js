@@ -89,7 +89,37 @@ async function listPermittedFolders(authClient, email) {
   }
 }
 
+// List folders shared with a specific folderId
+async function listPermittedFolderContent(authClient, folderId) {
+  const drive = google.drive({ version: 'v3', auth: authClient });
+
+  try {
+    const res = await drive.files.list({
+      q: `'${folderId}' in parents and trashed = false`,
+      fields: 'files(id, name, mimeType)',
+      
+    });
+
+    const folders = res.data.files;
+    if (!folders || folders.length === 0) {
+      console.log(`No folders shared with ${folderId}`);
+      return [];
+    }
+
+    console.log(`Folders shared with ${folderId}:`);
+    folders.forEach((folder) => {
+      console.log(`${folder.name} (${folder.id})`);
+    });
+
+    return folders;
+  } catch (err) {
+    console.error('Error listing folders:', err.message);
+    return [];
+  }
+}
+
 module.exports = {
   authorize,
   listPermittedFolders,
+  listPermittedFolderContent
 };

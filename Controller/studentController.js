@@ -11,8 +11,8 @@ exports.studentRegister = async(req, res) => {
 
 exports.studentLogin = async(req, res) => {
     try{
-        const {code,message,token, studentId, accountState, accountType} = await studentServices.studentLogin(req.body);
-        res.status(200).json({code, message, token, studentId, accountState, accountType});
+        const {code,message,token, studentId, accountState, accountType, email, name} = await studentServices.studentLogin(req.body);
+        res.status(200).json({code, message, token, studentId, accountState, accountType, email, name});
     }catch(err){
         res.status(500).json ({status:500, message:err.message})
     }

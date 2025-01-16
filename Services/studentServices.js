@@ -115,7 +115,7 @@ exports.studentLogin = async(data) => {
 
         console.log(token, student)
 
-        return{code:200, message:'student login success', token:token,studentId:student._id, accountState:student.accountState, accountType:student.accountType}
+        return{code:200, message:'student login success', token:token,studentId:student._id, accountState:student.accountState, accountType:student.accountType, email:student.email, name:student.name}
     }catch(err){
         console.error(err)
         throw new Error('cant log')
