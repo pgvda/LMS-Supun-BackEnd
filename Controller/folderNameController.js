@@ -9,3 +9,12 @@ exports.createFolderInDrive = async(req, res) => {
         res.status(500).json ({status:500, message:err.message})
     }
 }
+
+exports.getAllFolderName = async(req, res) => {
+    try{
+        const {code,message, data} = await folderNameService.getAllFolderName();
+        res.status(200).json({code:code,message:message, data});
+    }catch(err){
+        res.status(500).json ({status:500, message:err.message})
+    }
+}

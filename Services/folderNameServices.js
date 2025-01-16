@@ -30,3 +30,22 @@ exports.createFolderInDrive = async(folderName) => {
         throw new Error('cant create folder')
     }
 }
+
+exports.getAllFolderName = async() => {
+    try{
+        const folders = await FolderName.find();
+
+        if(!folders){
+            return({code:400, message:'no any folder available'});
+        }
+
+        const response = folders.map((data) => {
+            return data.folderName;
+        })
+
+        return{code:200, message: 'success ', data:response}
+    }catch(err){
+        console.log(err);
+        throw new Error('cant get folder names');
+    }
+}
