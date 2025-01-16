@@ -118,8 +118,22 @@ async function listPermittedFolderContent(authClient, folderId) {
   }
 }
 
+async function createFolder(authClient, folderName) {
+  const drive = google.drive({ version: 'v3', auth: authClient });
+  const fileMetadata = {
+    name: folderName,
+    mimeType: 'application/vnd.google-apps.folder',
+  };
+  const res = await drive.files.create({
+    resource: fileMetadata,
+    fields: 'id',
+  });
+  return res.data.id;
+}
+
 module.exports = {
   authorize,
   listPermittedFolders,
-  listPermittedFolderContent
+  listPermittedFolderContent,
+  createFolder
 };

@@ -26,8 +26,10 @@ db.once('open', () => {
 });
 
 const studentRouters = require('./Routers/studentRoutes');
+const folderNameRouters = require('./Routers/folderNameRoutes');
 
 app.use('/api/students', studentRouters);
+app.use('/api/folders', folderNameRouters);
 
 app.get('/files', async (req, res) => {
     try {
