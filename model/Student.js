@@ -86,7 +86,8 @@ const studentSchema = new mongoose.Schema({
     },
     otp: {
         type:String
-    }
+    },
+    
 });
 
 const Student = mongoose.model('Student', studentSchema);

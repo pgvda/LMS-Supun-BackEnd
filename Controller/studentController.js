@@ -98,3 +98,12 @@ exports.changeStudentState = async(req, res) => {
         res.status(500).json ({status:500, message:err.message})
     }
 }
+
+exports.giveAditionalFolderAccess = async(req, res) => {
+    try{
+        const {code,message} = await studentServices.giveAditionalFolderAccess(req.body)
+        res.status(200).json({code,message});
+    }catch(err){
+        res.status(500).json ({status:500, message:err.message})
+    }
+}

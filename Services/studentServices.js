@@ -9,6 +9,7 @@ const validator = require('validator');
 const { createRegNo } = require('../utils/createRegNo');
 const { grantAccess } = require('../middleware/grantAccess');
 const { authorize } = require('../utils/connectDrive');
+const { getFolderId } = require('../utils/getFolderId');
 
 
 exports.studentRegister = async(data)=> {
@@ -25,7 +26,8 @@ exports.studentRegister = async(data)=> {
             address,
             studentIdImg,
             password,
-            historyType
+            historyType,
+            className
         } = data
 
         const requiredField = {
@@ -40,7 +42,8 @@ exports.studentRegister = async(data)=> {
             address,
             studentIdImg,
             historyType,
-            password
+            password,
+            className
         };
 
         for(const [key, value] of Object.entries(requiredField)){
@@ -55,7 +58,7 @@ exports.studentRegister = async(data)=> {
             return{code:401, message:'email already registered'}
         }
         const authClient = await authorize();
-        const fileId = '1kQwlslbEuF6nv4pycVx1EXhavJGxbLk9';
+        const fileId = await getFolderId(className);
 
         const isGiveAccess = await grantAccess(authClient,fileId, email)
 
@@ -343,6 +346,26 @@ exports.updateStudent = async(id, data) => {
 
         await student.updateOne(updateData);
         return {code:200,message:'updated'}
+    }catch(err){
+        console.error(err);
+        throw new Error('cant update student')
+    }
+}
+
+exports.giveAditionalFolderAccess = async(data) => {
+    try{
+        const {email, className} = data
+
+        const authClient = await authorize();
+        const fileId = await getFolderId(className);
+
+        const isGiveAccess = await grantAccess(authClient,fileId, email)
+
+        if(!isGiveAccess){
+            return{code:405,message:'drive access denite'}
+        }
+
+        return{code:200, message:'give access'}
     }catch(err){
         console.error(err);
         throw new Error('cant update student')
