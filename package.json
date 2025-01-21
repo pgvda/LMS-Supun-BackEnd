@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
+    "atob": "^2.1.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
