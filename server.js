@@ -11,7 +11,7 @@ const app = express();
 const corsOption = {
     origin:'*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'admin_id']
 }
 
 app.use(bodyParser.json());
