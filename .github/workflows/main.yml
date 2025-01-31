@@ -1,0 +1,49 @@
+name: Deploy Backend
+on:
+  push:
+    branches:
+      - deploy
+      - main
+      
+
+jobs:
+  deploy_qa:
+    if: github.ref == 'refs/heads/lyra/qa'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Connect with VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p apps/lms/backend && cd apps/lms/backend
+            
+            if [ -d ".git" ]; then
+            git add *
+              git stash
+              git pull origin deploy
+            else
+              git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
+            fi
+            
+            npm install --force
+            npm run build
+
+
+            pid=$(pm2 pid "lms-backend" 2>/dev/null)
+            if [ -n "$pid" ]; then
+              echo "Reloading application"
+              pm2 reload "lms-backend"
+              pm2 save
+            else
+              echo "New application"
+              pm2 start npm --name "lms-backend" -- start
+              pm2 startup
+              pm2 save
+            fi
