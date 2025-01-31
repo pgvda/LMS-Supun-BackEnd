@@ -35,18 +35,19 @@ jobs:
               git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
             fi
             
-            # Use full paths if necessary
-            $(which npm) install --force
-            $(which npm) start
+            # Install dependencies
+            npm install --force
             
-            pid=$($(which pm2) pid "lms-backend" 2>/dev/null)
-            if [ -n "$pid" ]; then
-              echo "Reloading application"
-              $(which pm2) reload "lms-backend"
-              $(which pm2) save
+            # Check if PM2 process exists
+            if pm2 list | grep -q "lms-backend"; then
+              echo "Reloading existing PM2 process"
+              pm2 reload lms-backend
             else
-              echo "New application"
-              $(which pm2) start npm --name "lms-backend" -- start
-              $(which pm2) startup
-              $(which pm2) save
+              echo "Starting new PM2 process"
+              pm2 start server.js --name "lms-backend"
             fi
+            
+            # Save PM2 process list
+            pm2 save
+            
+            echo "Deployment completed successfully"
