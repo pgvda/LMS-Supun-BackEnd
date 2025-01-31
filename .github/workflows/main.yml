@@ -4,7 +4,6 @@ on:
     branches:
       - deploy
       - main
-      
 
 jobs:
   deploy:
@@ -23,18 +22,21 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             mkdir -p apps/lms/backend && cd apps/lms/backend
-            
+
             if [ -d ".git" ]; then
-            git add *
               git stash
               git pull origin deploy
             else
-              git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
+              git clone -b deploy git@github.com:pgvda/LMS-Supun-BackEnd.git .
             fi
-            
+
             npm install --force
             npm run build
 
+            # Ensure PM2 is installed
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
 
             pid=$(pm2 pid "lms-backend" 2>/dev/null)
             if [ -n "$pid" ]; then
