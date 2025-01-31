@@ -14,10 +14,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Debug Secrets
-        run: |
-          echo "HOST: ***$(echo "${{ secrets.HOST }}" | cut -c1-5)***"
-          echo "USERNAME: ***$(echo "${{ secrets.USERNAME }}" | cut -c1-3)***"
-          echo "PORT: ***${{ secrets.SSH_PORT }}***"
-          echo "PRIVATE_KEY starts with: ***$(echo "${{ secrets.PRIVATE_KEY }}" | head -c 10)***"
+      - name: Connect with VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p apps/lms/backend && cd apps/lms/backend
+            
+            if [ -d ".git" ]; then
+            git add *
+              git stash
+              git pull origin deploy
+            else
+              git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
+            fi
+            
+            npm install --force
+            npm run build
 
+
+            pid=$(pm2 pid "lms-backend" 2>/dev/null)
+            if [ -n "$pid" ]; then
+              echo "Reloading application"
+              pm2 reload "lms-backend"
+              pm2 save
+            else
+              echo "New application"
+              pm2 start npm --name "lms-backend" -- start
+              pm2 startup
+              pm2 save
+            fi
