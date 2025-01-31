@@ -4,7 +4,6 @@ on:
     branches:
       - deploy
       - main
-
 jobs:
   deploy:
     if: github.ref == 'refs/heads/deploy'
@@ -12,7 +11,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: Connect with VPS
         uses: appleboy/ssh-action@master
         with:
@@ -21,26 +19,34 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # Load environment variables and PATH
+            source ~/.bashrc
+            source ~/.profile
+            
+            # If using NVM, initialize it
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
             mkdir -p apps/lms/backend && cd apps/lms/backend
-
             if [ -d ".git" ]; then
               git stash
               git pull origin deploy
             else
               git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
             fi
-
-            npm install --force
-            npm start
-
-            pid=$(pm2 pid "lms-backend" 2>/dev/null)
+            
+            # Use full paths if necessary
+            $(which npm) install --force
+            $(which npm) start
+            
+            pid=$($(which pm2) pid "lms-backend" 2>/dev/null)
             if [ -n "$pid" ]; then
               echo "Reloading application"
-              pm2 reload "lms-backend"
-              pm2 save
+              $(which pm2) reload "lms-backend"
+              $(which pm2) save
             else
               echo "New application"
-              pm2 start npm --name "lms-backend" -- start
-              pm2 startup
-              pm2 save
+              $(which pm2) start npm --name "lms-backend" -- start
+              $(which pm2) startup
+              $(which pm2) save
             fi
