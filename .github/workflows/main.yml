@@ -7,7 +7,7 @@ on:
       
 
 jobs:
-  deploy_qa:
+  deploy:
     if: github.ref == 'refs/heads/deploy'
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +16,8 @@ jobs:
 
       - name: Debug Secrets
         run: |
-          echo "HOST: ***${{ secrets.HOST:0:3 }}***"
-          echo "USERNAME: ***${{ secrets.USERNAME:0:3 }}***"
+          echo "HOST: ***$(echo "${{ secrets.HOST }}" | cut -c1-5)***"
+          echo "USERNAME: ***$(echo "${{ secrets.USERNAME }}" | cut -c1-3)***"
           echo "PORT: ***${{ secrets.SSH_PORT }}***"
-          echo "PRIVATE_KEY starts with: ***$(echo "${{ secrets.PRIVATE_KEY }}" | cut -c1-10)***"
+          echo "PRIVATE_KEY starts with: ***$(echo "${{ secrets.PRIVATE_KEY }}" | head -c 10)***"
+
