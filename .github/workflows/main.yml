@@ -21,8 +21,20 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            # Source the shell configuration files
+            source ~/.bashrc
+            source ~/.profile
+            
+            # Print environment information for debugging
+            echo "Current PATH: $PATH"
+            echo "Node version: $(node -v)"
+            echo "NPM version: $(npm -v)"
+            echo "PM2 version: $(pm2 -v)"
+            
+            # Navigate to the project directory
             mkdir -p apps/lms/backend && cd apps/lms/backend
 
+            # Clone or pull the repository
             if [ -d ".git" ]; then
               git stash
               git pull origin deploy
@@ -30,17 +42,19 @@ jobs:
               git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
             fi
 
+            # Install dependencies and start the application
             npm install --force
             npm start
 
-            pid=$(pm2 pid "lms-backend" 2>/dev/null)
-            if [ -n "$pid" ]; then
+            # Check if the PM2 process exists and handle accordingly
+            if pm2 list | grep -q "lms-backend"; then
               echo "Reloading application"
               pm2 reload "lms-backend"
-              pm2 save
             else
-              echo "New application"
+              echo "Starting new application"
               pm2 start npm --name "lms-backend" -- start
-              pm2 startup
-              pm2 save
             fi
+
+            # Save the PM2 process list
+            pm2 save
+
