@@ -27,7 +27,7 @@ jobs:
               git stash
               git pull origin deploy
             else
-              git clone -b deploy git@github.com:pgvda/LMS-Supun-BackEnd.git .
+              git clone -b deploy https://github.com/hashBazeLK/lyra-personal-backend.git .
             fi
 
             npm install --force
