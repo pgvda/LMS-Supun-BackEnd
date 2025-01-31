@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy_qa:
-    if: github.ref == 'refs/heads/lyra/qa'
+    if: github.ref == 'refs/heads/deploy'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
