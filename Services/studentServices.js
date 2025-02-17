@@ -26,8 +26,7 @@ exports.studentRegister = async(data)=> {
             address,
             studentIdImg,
             password,
-            historyType,
-            className
+            historyType
         } = data
 
         const requiredField = {
@@ -42,8 +41,7 @@ exports.studentRegister = async(data)=> {
             address,
             studentIdImg,
             historyType,
-            password,
-            className
+            password
         };
 
         for(const [key, value] of Object.entries(requiredField)){
@@ -57,14 +55,14 @@ exports.studentRegister = async(data)=> {
         if(student){
             return{code:401, message:'email already registered'}
         }
-        const authClient = await authorize();
-        const fileId = await getFolderId(className);
+        // const authClient = await authorize();
+        // const fileId = await getFolderId(className);
 
-        const isGiveAccess = await grantAccess(authClient,fileId, email)
+        // const isGiveAccess = await grantAccess(authClient,fileId, email)
 
-        if(!isGiveAccess){
-            return{code:405,message:'drive access denite'}
-        }
+        // if(!isGiveAccess){
+        //     return{code:405,message:'drive access denite'}
+        // }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
