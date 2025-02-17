@@ -11,7 +11,7 @@ const SCOPES = [
 ];
 
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'credential.json');
 
 // Load previously authorized credentials
 async function loadSavedCredentialsIfExist() {
