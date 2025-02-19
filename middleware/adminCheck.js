@@ -4,6 +4,8 @@ const adminCheck = async(req, res, next) =>{
     try{
         const adminID = req.headers['admin_id'];
 
+        console.log(adminID)
+
         if(!adminID){
             return res.status(400).json({msg:'Admin ID is required'})
         }
