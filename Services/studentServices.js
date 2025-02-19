@@ -98,6 +98,7 @@ exports.studentRegister = async(data)=> {
     }
 }
 
+
 exports.studentLogin = async(data) => {
     try{
         const {email,password} = data;
