@@ -59,7 +59,7 @@ exports.dirveFile = async(email) => {
         
         console.log(email);
         const files = await listPermittedFolders(authClient, email);
-        return {code:200, message:files,file:files}
+        return {code:200, files:files}
       } catch (error) {
         console.error('Error fetching files:', error.message);
        throw new Error('Failed to fetch files');
