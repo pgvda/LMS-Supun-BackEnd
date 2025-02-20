@@ -33,10 +33,10 @@ app.use('/api/students', studentRouters);
 app.use('/api/folders', folderNameRouters);
 app.use('/api/secure-folders', secureRoutes);
 
-app.get('/files', async (req, res) => {
+app.get('/files/:email', async (req, res) => {
     try {
       const authClient = await authorize();
-      const email = req.query.email;
+      const email = params.email;
       console.log(email);
       const files = await listPermittedFolders(authClient, email);
       res.json(files); // Send the list of files as a response
