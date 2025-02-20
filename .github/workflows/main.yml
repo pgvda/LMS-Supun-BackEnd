@@ -1,0 +1,53 @@
+name: Deploy Backend
+on:
+  push:
+    branches:
+      - deploy
+      - main
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Connect with VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Load environment variables and PATH
+            source ~/.bashrc
+            source ~/.profile
+            
+            # If using NVM, initialize it
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            mkdir -p apps/lms/backend && cd apps/lms/backend
+            if [ -d ".git" ]; then
+              git stash
+              git pull origin deploy
+            else
+              git clone -b deploy https://github.com/pgvda/LMS-Supun-BackEnd.git .
+            fi
+            
+            # Install dependencies
+            npm install --force
+            
+            # Check if PM2 process exists
+            if pm2 list | grep -q "lms-backend"; then
+              echo "Reloading existing PM2 process"
+              pm2 reload lms-backend
+            else
+              echo "Starting new PM2 process"
+              pm2 start server.js --name "lms-backend"
+            fi
+            
+            # Save PM2 process list
+            pm2 save
+            
+            echo "Deployment completed successfully"
