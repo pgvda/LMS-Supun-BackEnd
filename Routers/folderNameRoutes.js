@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post('/create/folder', adminCheck, authenticateToken,folderNameController.createFolderInDrive);
 router.get('/folder-names',folderNameController.getAllFolderName);
+router.get('/diveFiles/:email',folderNameController.dirveFile);
 
 
 module.exports = router;
