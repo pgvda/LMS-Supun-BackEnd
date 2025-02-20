@@ -60,6 +60,6 @@ app.get('/files', async (req, res) => {
   });
   
 const PORT = config.port || 4001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
