@@ -55,7 +55,7 @@ app.get('/files', async (req, res) => {
       res.json(files); // Send the list of files as a response
     } catch (error) {
       console.error('Error fetching files:', error.message);
-      res.status(500).send('Failed to fetch files');
+      res.status(500).send('Failed to fetch files', error.message);
     }
   });
   
