@@ -65,3 +65,16 @@ exports.dirveFile = async(email) => {
        throw new Error('Failed to fetch files');
       }
 }
+
+exports.folderContent = async(folderId)=> {
+    try {
+        const authClient = await authorize();
+        
+        
+        const files = await listPermittedFolderContent(authClient, folderId);
+        return {code:200, message:'file fetched',file:files} // Send the list of files as a response
+      } catch (error) {
+        console.error('Error fetching files:', error.message);
+        throw new Error('Failed to fetch files', error.message);
+      }
+}
