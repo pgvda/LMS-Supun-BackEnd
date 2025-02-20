@@ -35,7 +35,9 @@ app.use('/api/secure-folders', secureRoutes);
 
 app.get('/files/:email', async (req, res) => {
     try {
+      console.log('1');
       const authClient = await authorize();
+      console.log('2');
       const email = params.email;
       console.log(email);
       const files = await listPermittedFolders(authClient, email);
