@@ -1,5 +1,5 @@
 const FolderName = require('../model/DriveFolders');
-const { createFolder, authorize, listPermittedFolders } = require('../utils/connectDrive');
+const { createFolder, authorize, listPermittedFolders,listPermittedFolderContent } = require('../utils/connectDrive');
 
 
 exports.createFolderInDrive = async(folderName) => {
@@ -59,7 +59,7 @@ exports.dirveFile = async(email) => {
         
         console.log(email);
         const files = await listPermittedFolders(authClient, email);
-        return {code:200, message:'file fetch',file:files}
+        return {code:200, files:files}
       } catch (error) {
         console.error('Error fetching files:', error.message);
        throw new Error('Failed to fetch files');
