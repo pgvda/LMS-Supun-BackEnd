@@ -72,7 +72,8 @@ exports.folderContent = async(folderId)=> {
         
         
         const files = await listPermittedFolderContent(authClient, folderId);
-        return {code:200, message:'file fetched',file:files} // Send the list of files as a response
+        console.log(files)
+        return {code:200, files:files} // Send the list of files as a response
       } catch (error) {
         console.error('Error fetching files:', error.message);
         throw new Error('Failed to fetch files', error.message);
