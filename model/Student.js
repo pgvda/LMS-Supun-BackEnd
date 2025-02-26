@@ -87,6 +87,9 @@ const studentSchema = new mongoose.Schema({
     otp: {
         type:String
     },
+    isDelete: {
+        type:Boolean
+    }
     
 });
 

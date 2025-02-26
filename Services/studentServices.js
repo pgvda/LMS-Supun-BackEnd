@@ -50,7 +50,7 @@ exports.studentRegister = async(data)=> {
             }
         }
 
-        const student = await Student.findOne({email});
+        const student = await Student.findOne({email:email, isDelete:false});
         
         if(student){
             return{code:401, message:'email already registered'}
@@ -236,7 +236,9 @@ exports.getByStudentId = async(id) => {
 
 exports.getAllStudent = async() => {
     try{
-        const student = await Student.find();
+        const student = await Student.find({
+            isDelete:false
+        });
 
         if(!student){
             return {code:400,data:'not any data'}
@@ -265,8 +267,14 @@ exports.deleteStudent = async(id) => {
             return { code: 400, message: 'No student related to that ID' };
         }
 
+        const updateData = {};
+        if(id !== null){
+            updateData.isDelete = true,
+            updateData.email = student.studentIdImg
+        }
 
-        await student.deleteOne();
+
+        await student.updateOne(updateData);
 
         return { code: 200, message: 'student deleted successfully' };
     } catch (err) {
