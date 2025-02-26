@@ -33,18 +33,7 @@ app.use('/api/students', studentRouters);
 app.use('/api/folders', folderNameRouters);
 app.use('/api/secure-folders', secureRoutes);
 
-app.get('/files', async (req, res) => {
-    try {
-      const authClient = await authorize();
-      const email = req.query.email;
-      console.log(email);
-      const files = await listPermittedFolders(authClient, email);
-      res.json(files); // Send the list of files as a response
-    } catch (error) {
-      console.error('Error fetching files:', error.message);
-      res.status(500).send('Failed to fetch files');
-    }
-  });
+
 
   app.get('/files/content/:id', async (req, res) => {
     try {
@@ -55,11 +44,11 @@ app.get('/files', async (req, res) => {
       res.json(files); // Send the list of files as a response
     } catch (error) {
       console.error('Error fetching files:', error.message);
-      res.status(500).send('Failed to fetch files');
+      res.status(500).send('Failed to fetch files', error.message);
     }
   });
   
 const PORT = config.port || 4001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });

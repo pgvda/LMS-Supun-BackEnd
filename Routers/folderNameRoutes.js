@@ -5,8 +5,10 @@ const adminCheck = require('../middleware/adminCheck');
 
 const router = express.Router();
 
-router.post('/create/folder', adminCheck, authenticateToken,folderNameController.createFolderInDrive);
+router.post('/create/folder', authenticateToken,folderNameController.createFolderInDrive);
 router.get('/folder-names',folderNameController.getAllFolderName);
+router.get('/diveFiles/:email',folderNameController.dirveFile);
+router.get('/folderContent/:id',folderNameController.folderContent);
 
 
 module.exports = router;

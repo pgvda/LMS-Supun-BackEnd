@@ -18,3 +18,26 @@ exports.getAllFolderName = async(req, res) => {
         res.status(500).json ({status:500, message:err.message})
     }
 }
+
+exports.dirveFile = async(req, res) => {
+    try{
+       
+        const email = req.params.email
+        const {code,files} = await folderNameService.dirveFile(email);
+        res.status(200).json({code:code,files:files});
+    }catch(err){
+        res.status(500).json ({status:500, message:err.message})
+    } 
+}
+
+exports.folderContent = async(req, res) => {
+    try{
+        console.log('run')
+        const folderId = req.params.id
+        console.log(folderId)
+        const {code, files} = await folderNameService.folderContent(folderId);
+        res.status(200).json({code:code,files:files});
+    }catch(err){
+        res.status(500).json ({status:500, message:err.message})
+    } 
+}

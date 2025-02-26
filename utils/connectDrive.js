@@ -16,6 +16,7 @@ const CREDENTIALS_PATH = path.join(process.cwd(), 'credential.json');
 // Load previously authorized credentials
 async function loadSavedCredentialsIfExist() {
   try {
+    console.log('6');
     const content = await fs.readFile(TOKEN_PATH);
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
@@ -28,6 +29,7 @@ async function loadSavedCredentialsIfExist() {
 // Save credentials
 async function saveCredentials(client) {
   try {
+    console.log('7');
     const content = await fs.readFile(CREDENTIALS_PATH);
     const keys = JSON.parse(content);
     const key = keys.installed || keys.web;
@@ -46,10 +48,12 @@ async function saveCredentials(client) {
 
 // Authorize and return an authenticated client
 async function authorize() {
+  console.log('3');
   let client = await loadSavedCredentialsIfExist();
   if (client) {
     return client;
   }
+  console.log('5');
   client = await authenticate({
     scopes: SCOPES,
     keyfilePath: CREDENTIALS_PATH,
