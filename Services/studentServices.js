@@ -85,7 +85,8 @@ exports.studentRegister = async(data)=> {
             password:hashedPassword,
             historyType,
             regNo:registerNo,
-            otp:''
+            otp:'',
+            isDelete:false
 
         })
 
