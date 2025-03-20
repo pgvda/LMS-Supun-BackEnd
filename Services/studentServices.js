@@ -271,7 +271,7 @@ exports.deleteStudent = async(id) => {
         const updateData = {};
         if(id !== null){
             updateData.isDelete = true,
-            updateData.email = student.studentIdImg
+            updateData.email = student._id
         }
 
 
