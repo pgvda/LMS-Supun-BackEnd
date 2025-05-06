@@ -135,9 +135,61 @@ async function createFolder(authClient, folderName) {
   return res.data.id;
 }
 
+async function revokeAllPermissions(authClient, emailToRemove) {
+  const drive = google.drive({ version: 'v3', auth: authClient });
+
+  try {
+    // 1. Get all folders shared with the email
+    const folders = await listPermittedFolders(authClient, emailToRemove);
+
+    if (!folders || folders.length === 0) {
+      console.log(`No folders shared with ${emailToRemove}. Nothing to revoke.`);
+      return;
+    }
+
+    console.log(`Revoking access to ${folders.length} folders for ${emailToRemove}...`);
+
+    // 2. For each folder, revoke the permission
+    for (const folder of folders) {
+      try {
+        const res = await drive.permissions.list({
+          fileId: folder.id,
+          fields: 'permissions(id, emailAddress, role)',
+        });
+
+        const permissions = res.data.permissions;
+        if (!permissions || permissions.length === 0) {
+          console.log(`No permissions found on folder ${folder.name} (${folder.id}).`);
+          continue;
+        }
+
+        // Find permission by email
+        const permission = permissions.find(p => p.emailAddress === emailToRemove);
+
+        if (permission) {
+          await drive.permissions.delete({
+            fileId: folder.id,
+            permissionId: permission.id,
+          });
+          console.log(`✅ Revoked access from folder: ${folder.name} (${folder.id})`);
+        } else {
+          console.log(`No permission found for ${emailToRemove} on folder ${folder.name} (${folder.id}).`);
+        }
+      } catch (innerErr) {
+        console.error(`❌ Error revoking permission on folder ${folder.name} (${folder.id}):`, innerErr.message);
+      }
+    }
+
+    console.log(`✅ All permissions for ${emailToRemove} have been revoked.`);
+  } catch (err) {
+    console.error('❌ Error revoking all permissions:', err.message);
+  }
+}
+
 module.exports = {
   authorize,
   listPermittedFolders,
   listPermittedFolderContent,
-  createFolder
+  createFolder,
+  revokeAllPermissions,
 };
