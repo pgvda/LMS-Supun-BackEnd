@@ -41,3 +41,12 @@ exports.folderContent = async(req, res) => {
         res.status(500).json ({status:500, message:err.message})
     } 
 }
+
+exports.deleteTokenFile = async(req, res) => {
+    try{
+        const {code, message} = await folderNameService.deleteTokenFile();
+        res.status(200).json({code:code,message:message});
+    }catch(err){
+        res.status(500).json ({status:500, message:err.message})
+    } 
+}

@@ -9,6 +9,7 @@ router.post('/create/folder', authenticateToken,folderNameController.createFolde
 router.get('/folder-names',folderNameController.getAllFolderName);
 router.get('/diveFiles/:email',folderNameController.dirveFile);
 router.get('/folderContent/:id',folderNameController.folderContent);
+router.get('/delete/tokenfile',folderNameController.deleteTokenFile);
 
 
 module.exports = router;
