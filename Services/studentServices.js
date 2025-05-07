@@ -8,7 +8,7 @@ const passwordValidate = require('../middleware/passwordValidator');
 const validator = require('validator');
 const { createRegNo } = require('../utils/createRegNo');
 const { grantAccess } = require('../middleware/grantAccess');
-const { authorize } = require('../utils/connectDrive');
+const { authorize, revokeAllPermissions } = require('../utils/connectDrive');
 const { getFolderId } = require('../utils/getFolderId');
 
 
@@ -263,6 +263,10 @@ exports.deleteStudent = async(id) => {
 
         const student = await Student.findById(id);
 
+        const authClient = await authorize();
+
+        revokeAllPermissions(authClient, student.email);
+
 
         if(!student){
             return { code: 400, message: 'No student related to that ID' };
@@ -276,6 +280,8 @@ exports.deleteStudent = async(id) => {
 
 
         await student.updateOne(updateData);
+
+        
 
         return { code: 200, message: 'student deleted successfully' };
     } catch (err) {
@@ -299,6 +305,11 @@ exports.changeStudentState = async(id, state) => {
         }
 
         await student.updateOne(updateData);
+
+        if(state === 'de-active'){
+            const authClient =  await authorize();
+            revokeAllPermissions(authClient, student.email);
+        }
 
         return {code:200,message:'updated'}
     }catch(err){
