@@ -64,6 +64,42 @@ async function authorize() {
   return client;
 }
 
+async function listPermittedMainFolders(authClient, email) {
+  const drive = google.drive({ version: 'v3', auth: authClient });
+
+  try {
+    const res = await drive.files.list({
+      q: `'${email}' in readers and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name, parents)',
+      pageSize: 100,
+    });
+
+    const allFolders = res.data.files;
+    if (!allFolders || allFolders.length === 0) {
+      console.log(`No shared folders for ${email}`);
+      return [];
+    }
+
+    // Build a set of all folder IDs
+    const folderIdsSet = new Set(allFolders.map(folder => folder.id));
+
+    // Filter folders whose parents are not in the shared folders list
+    const topLevelFolders = allFolders.filter(folder => {
+      // If no parents, consider it top-level
+      if (!folder.parents || folder.parents.length === 0) return true;
+
+      // If none of the parents are in the shared folders list, it's top-level
+      return !folder.parents.some(parentId => folderIdsSet.has(parentId));
+    });
+
+    return topLevelFolders;
+  } catch (err) {
+    console.error('Error listing permitted main folders:', err.message);
+    return [];
+  }
+}
+
+
 // List folders shared with a specific email
 async function listPermittedFolders(authClient, email) {
   const drive = google.drive({ version: 'v3', auth: authClient });
@@ -135,61 +171,10 @@ async function createFolder(authClient, folderName) {
   return res.data.id;
 }
 
-async function revokeAllPermissions(authClient, emailToRemove) {
-  const drive = google.drive({ version: 'v3', auth: authClient });
-
-  try {
-    // 1. Get all folders shared with the email
-    const folders = await listPermittedFolders(authClient, emailToRemove);
-
-    if (!folders || folders.length === 0) {
-      console.log(`No folders shared with ${emailToRemove}. Nothing to revoke.`);
-      return;
-    }
-
-    console.log(`Revoking access to ${folders.length} folders for ${emailToRemove}...`);
-
-    // 2. For each folder, revoke the permission
-    for (const folder of folders) {
-      try {
-        const res = await drive.permissions.list({
-          fileId: folder.id,
-          fields: 'permissions(id, emailAddress, role)',
-        });
-
-        const permissions = res.data.permissions;
-        if (!permissions || permissions.length === 0) {
-          console.log(`No permissions found on folder ${folder.name} (${folder.id}).`);
-          continue;
-        }
-
-        // Find permission by email
-        const permission = permissions.find(p => p.emailAddress === emailToRemove);
-
-        if (permission) {
-          await drive.permissions.delete({
-            fileId: folder.id,
-            permissionId: permission.id,
-          });
-          console.log(`✅ Revoked access from folder: ${folder.name} (${folder.id})`);
-        } else {
-          console.log(`No permission found for ${emailToRemove} on folder ${folder.name} (${folder.id}).`);
-        }
-      } catch (innerErr) {
-        console.error(`❌ Error revoking permission on folder ${folder.name} (${folder.id}):`, innerErr.message);
-      }
-    }
-
-    console.log(`✅ All permissions for ${emailToRemove} have been revoked.`);
-  } catch (err) {
-    console.error('❌ Error revoking all permissions:', err.message);
-  }
-}
-
 module.exports = {
   authorize,
   listPermittedFolders,
   listPermittedFolderContent,
   createFolder,
-  revokeAllPermissions,
+  listPermittedMainFolders
 };
