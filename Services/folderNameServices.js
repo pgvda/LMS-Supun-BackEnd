@@ -1,7 +1,5 @@
 const FolderName = require('../model/DriveFolders');
-const { createFolder, authorize, listPermittedFolders,listPermittedFolderContent } = require('../utils/connectDrive');
-const fs = require('fs');
-const path = require('path');
+const { createFolder, authorize, listPermittedFolders,listPermittedFolderContent, listPermittedMainFolders } = require('../utils/connectDrive');
 
 
 exports.createFolderInDrive = async(folderName) => {
@@ -82,22 +80,17 @@ exports.folderContent = async(folderId)=> {
       }
 }
 
-exports.deleteTokenFile = async()=> {
+exports.getDriveRootFolders = async(email) => {
     try {
-        const tokenFilePath = path.join(process.cwd(), 'token.json');
+        console.log('1');
+        const authClient = await authorize();
+        console.log('2');
         
-        fs.unlink(tokenFilePath, (err) => {
-            if(err){
-                if(err.code === 'ENOENT') {
-                    return {code:400, message:'token.json not found'}
-                }
-                return {code:500, message:err.message}
-            }
-            return {code:200, message: 'delete successful'} 
-        })
-        
+        console.log(email);
+        const files = await listPermittedMainFolders(authClient, email);
+        return {code:200, files:files}
       } catch (error) {
         console.error('Error fetching files:', error.message);
-        throw new Error('conot delete', error.message);
+       throw new Error('Failed to fetch files');
       }
 }
