@@ -42,10 +42,12 @@ exports.folderContent = async(req, res) => {
     } 
 }
 
-exports.deleteTokenFile = async(req, res) => {
+exports.getDirveRootFolders = async(req, res) => {
     try{
-        const {code, message} = await folderNameService.deleteTokenFile();
-        res.status(200).json({code:code,message:message});
+       
+        const email = req.params.email
+        const {code,files} = await folderNameService.getDriveRootFolders(email);
+        res.status(200).json({code:code,files:files,folderType:'root'});
     }catch(err){
         res.status(500).json ({status:500, message:err.message})
     } 
